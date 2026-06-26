@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project presents a hierarchical Clinical NLP model for predicting Abbreviated Injury Scale (AIS) codes from trauma CT radiology reports.
+This project presents a hierarchical Clinical NLP framework for predicting Abbreviated Injury Scale (AIS) codes from trauma CT radiology reports.
 
 The proposed framework predicts AIS codes using only CT radiology reports, without incorporating additional clinical information such as age, sex, examination name, or other patient metadata.
 
@@ -20,9 +20,9 @@ Multiple CT reports from the same patient visit were grouped into a single Case 
 
 A total of 24,005 cases were used for model development and internal validation.
 
-| Dataset | Number of Cases |
-|---------|----------------:|
-| Development & Validation | 24,005 |
+| Dataset                  | Number of Cases |
+| ------------------------ | --------------: |
+| Development & Validation |          24,005 |
 
 ---
 
@@ -32,27 +32,27 @@ External validation was performed using trauma CT radiology reports collected fr
 
 A total of 1,460 cases were used to evaluate the generalization performance of the proposed model.
 
-| Dataset | Number of Cases |
-|---------|----------------:|
-| External Validation | 1,460 |
+| Dataset             | Number of Cases |
+| ------------------- | --------------: |
+| External Validation |           1,460 |
 
 ---
 
 # Method
 
-## 1. Preprocessing
+## 1. Dataset Construction
 
-AIS codes from the Korean Trauma Data Bank (KTDB) were first matched with CT radiology reports using the corresponding Case IDs.
+AIS codes from the Korean Trauma Data Bank (KTDB) were matched with CT radiology reports using the corresponding Case IDs.
 
-To ensure that only CT-identifiable injuries were included in the training labels, an AIS code filtering process was performed.
+To ensure consistency between CT findings and training labels, AIS codes were filtered according to the anatomical region of each CT examination.
 
-Since the first digit (D1) of an AIS code represents the injured body region, examination names were mapped to the corresponding AIS body regions. AIS codes that were inconsistent with the examination region were removed.
+Since the first digit (D1) of an AIS code represents the injured body region, examination names were mapped to their corresponding AIS body regions, and AIS codes inconsistent with the examination region were removed.
 
 For example,
 
-- Brain CT → AIS D1 = 1 (Head)
-- Chest CT → AIS D1 = 4 (Thorax)
-- Abdomen CT → AIS D1 = 5 (Abdomen)
+* Brain CT → AIS D1 = 1 (Head)
+* Chest CT → AIS D1 = 4 (Thorax)
+* Abdomen CT → AIS D1 = 5 (Abdomen)
 
 This filtering process improved the consistency between CT reports and AIS labels.
 
@@ -64,39 +64,64 @@ CT radiology reports underwent minimal text preprocessing, including whitespace 
 
 The merged report was encoded using BioClinical ModernBERT, followed by a fully connected classification layer with sigmoid activation for multi-label classification.
 
-Since AIS codes have a hierarchical structure in which the semantic meaning becomes increasingly specific from D1 to D7, the prediction task was decomposed into multiple hierarchical stages:
+AIS codes have a hierarchical semantic structure, becoming increasingly specific from D1 to D7. Accordingly, the prediction task was decomposed into multiple hierarchical stages:
 
-- D1: Body Region
-- D2: Anatomical Structure
-- D3-D4: Injury Type
-- D5-D6: Injury Severity
-- D7: Severity Score
+* D1 : Body Region
+* D2 : Anatomical Structure
+* D3-D4 : Injury Type
+* D5-D6 : Injury Severity
+* D7 : Severity Score
 
-The prediction pipeline follows the hierarchical order:
+The hierarchical prediction pipeline follows:
 
 D1 → D2 → D3-D4 + D5-D6 → D7
 
-Each stage is trained independently, and a corresponding AIS codebook is provided to restrict the prediction space to valid labels for that hierarchical level.
+Each stage is trained independently, and a corresponding AIS codebook is provided to restrict the prediction space to valid labels for each hierarchical level.
+
+This repository includes the implementation of the D1/D2 hierarchical model as a representative example of the proposed framework.
+
+The D3-D4 and D5-D6 models follow the same training and inference pipeline, differing only in the target AIS digit level and the corresponding label space (AIS codebook). Since the overall model architecture and training procedure are identical, only the representative D1/D2 implementation is provided in this repository.
 
 ---
 
 ## 3. Evaluation
 
-The filtered AIS labels were regarded as the ground truth for model evaluation.
+The filtered AIS labels were regarded as the ground truth for evaluation.
 
 Performance was evaluated using case-level multi-label classification with the following metrics:
 
-- Micro Precision
-- Micro Recall
-- Micro F1-score
-- Exact Match
-- Over Prediction
-- Missed Injury
+* Micro Precision
+* Micro Recall
+* Micro F1-score
+* Exact Match
+* Over Prediction
+* Missed Injury
+
+---
+
+## Input Format
+
+The expected input format is provided in `input_schema.json`.
+
+Each input sample consists of:
+
+* case_id: Unique identifier for each patient visit.
+* prompt: Merged CT radiology report used as the model input.
+* completion: List of ground-truth AIS codes corresponding to the case.
+
 
 ---
 
 # File Structure
 
+```text
+AISPrediction/
+│
+├── README.md
+├── d1_d2_model.py                  # Training script for the D1/D2 hierarchical model
+├── d1_d2_infer.py                  # Inference and evaluation script
+└── input_schema.json      # Example input schema
+```
 
 ---
 
@@ -104,4 +129,6 @@ Performance was evaluated using case-level multi-label classification with the f
 
 This repository does not include any patient data or institution-specific clinical information.
 
-Original CT radiology reports, AIS annotations, and other clinical data are not publicly available due to institutional data security and privacy regulations. This repository provides only the source code and project documentation.
+Original CT radiology reports, AIS annotations, and other clinical data are not publicly available due to institutional data security and privacy regulations.
+
+Only the source code, project documentation, and example input schema are provided in this repository.
