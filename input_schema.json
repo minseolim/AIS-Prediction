@@ -1,0 +1,8 @@
+{
+  "case_id": "CASE_000001",
+  "prompt": "<CT radiology report>",
+  "completion": [
+    "<AIS Code 1>",
+    "<AIS Code 2>"
+  ]
+}
