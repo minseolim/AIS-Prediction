@@ -70,7 +70,7 @@ Since AIS codes have a hierarchical structure in which the semantic meaning beco
 - D2: Anatomical Structure
 - D3-D4: Injury Type
 - D5-D6: Injury Severity
-- D7: Detailed Severity
+- D7: Severity Score
 
 The prediction pipeline follows the hierarchical order:
 
