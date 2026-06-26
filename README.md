@@ -120,7 +120,7 @@ AISPrediction/
 ├── README.md
 ├── d1_d2_model.py                  # Training script for the D1/D2 hierarchical model
 ├── d1_d2_infer.py                  # Inference and evaluation script
-└── input_schema.json      # Example input schema
+└── input_schema.json               # Example input schema
 ```
 
 ---
