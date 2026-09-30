@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from transformers import AutoTokenizer
 
-from filteredv3_infer_common_observed import (
+from infer_common import (
     BASE_MODEL_NAME,
     DEVICE,
     apply_global_threshold,
